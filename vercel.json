@@ -1,0 +1,21 @@
+{
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/trigger-agent?agentType=settlement",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/trigger-agent?agentType=ptp",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/trigger-agent?agentType=performance",
+      "schedule": "0 1 1 * *"
+    }
+  ]
+}

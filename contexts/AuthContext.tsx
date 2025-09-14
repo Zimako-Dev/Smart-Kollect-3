@@ -1,0 +1,462 @@
+"use client";
+
+import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { getSupabaseClient } from '@/lib/supabaseClient';
+
+// Define user roles
+export type UserRole = 'admin' | 'agent' | 'manager' | 'supervisor' | 'indigent clerk' | 'system' | 'super_admin';
+
+// Define user type
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+  user_metadata?: {
+    full_name?: string;
+    name?: string;
+    [key: string]: any;
+  };
+};
+
+// Define auth context type
+type AuthContextType = {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; requires2FA?: boolean; factorId?: string }>;
+  verify2FA: (factorId: string, code: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  checkPermission: (permission: string) => boolean;
+};
+
+// Create context
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Provider component
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  
+  // Track auth requests to prevent duplicates
+  const pendingAuthRequest = useRef<Promise<any> | null>(null);
+  
+  // Track mounted state and auth change timeout
+  let mounted = true;
+  let authChangeTimeoutId: NodeJS.Timeout | null = null;
+
+  // Check if user has permission
+  const checkPermission = (permission: string): boolean => {
+    if (!user) return false;
+    
+    // Admin has all permissions
+    if (user.role === 'admin') return true;
+    
+    // Role-based permissions
+    switch (permission) {
+      case 'view_dashboard':
+        return ['admin', 'agent', 'manager', 'supervisor', 'system'].includes(user.role);
+      case 'manage_debtors':
+        return ['admin', 'agent', 'manager', 'supervisor'].includes(user.role);
+      case 'make_calls':
+        return ['admin', 'agent', 'manager', 'supervisor'].includes(user.role);
+      case 'view_reports':
+        return ['admin', 'manager', 'supervisor'].includes(user.role);
+      case 'manage_users':
+        return ['admin', 'supervisor'].includes(user.role);
+      case 'manage_settings':
+        return ['admin'].includes(user.role);
+      default:
+        return false;
+    }
+  };
+
+  // Redirect based on user role - wrapped in useCallback to prevent recreation on each render
+  const redirectBasedOnRole = useCallback((role: UserRole, currentPath?: string, forceRedirect: boolean = false) => {
+    console.log("[AUTH] redirectBasedOnRole called with role:", role);
+    console.log("[AUTH] Current window location:", window.location.href);
+    console.log("[AUTH] Current path:", currentPath);
+    console.log("[AUTH] Force redirect:", forceRedirect);
+    
+    // Get the current path from window location if not provided
+    const actualCurrentPath = currentPath || (typeof window !== 'undefined' ? window.location.pathname : '');
+    
+    // Check if user is already on a valid page for their role
+    const isOnValidPage = () => {
+      switch (role) {
+        case 'super_admin':
+          return actualCurrentPath.startsWith('/super-admin');
+        case 'admin':
+          return actualCurrentPath.startsWith('/admin');
+        case 'system':
+          return actualCurrentPath.startsWith('/metrics-dashboard');
+        case 'agent':
+          return actualCurrentPath.startsWith('/user');
+        case 'manager':
+          return actualCurrentPath.startsWith('/manager');
+        case 'supervisor':
+          return actualCurrentPath.startsWith('/supervisor');
+        case 'indigent clerk':
+          return actualCurrentPath.startsWith('/indigent-clerk');
+        default:
+          return false;
+      }
+    };
+    
+    // Only redirect if user is not already on a valid page OR if force redirect is true
+    if (isOnValidPage() && !forceRedirect) {
+      console.log("[AUTH] User already on valid page for role, skipping redirect");
+      return;
+    }
+    
+    switch (role) {
+      case 'super_admin':
+        console.log("[AUTH] Redirecting super admin to /super-admin");
+        router.push('/super-admin');
+        break;
+      case 'admin':
+        console.log("[AUTH] Redirecting admin to /admin/dashboard");
+        router.push('/admin/dashboard');
+        break;
+      case 'system':
+        console.log("[AUTH] Redirecting system user to /metrics-dashboard");
+        router.push('/metrics-dashboard');
+        break;
+      case 'agent':
+        console.log("[AUTH] Redirecting agent to /user/dashboard");
+        router.push('/user/dashboard');
+        break;
+      case 'manager':
+        console.log("[AUTH] Redirecting manager to /manager/dashboard");
+        router.push('/manager/dashboard');
+        break;
+      case 'supervisor':
+        console.log("[AUTH] Redirecting supervisor to /supervisor/dashboard");
+        router.push('/supervisor/dashboard');
+        break;
+      case 'indigent clerk':
+        console.log("[AUTH] Redirecting indigent clerk to /indigent-clerk/dashboard");
+        router.push('/indigent-clerk/dashboard');
+        break;
+      default:
+        console.log("[AUTH] Unknown role, redirecting to default /user/dashboard");
+        router.push('/user/dashboard');
+    }
+  }, [router]);
+
+  // Fetch user profile from database without caching
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    try {      
+      console.log('[AUTH] Fetching user profile from database');
+      const supabase = getSupabaseClient();
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, role, avatar_url')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('[AUTH] Error fetching profile:', error);
+        return null;
+      }
+      
+      if (!profile) {
+        console.log('[AUTH] No profile found for user:', userId);
+        return null;
+      }
+      
+      // Map database profile to User type
+      const userProfile: User = {
+        id: profile.id,
+        name: profile.full_name,
+        email: profile.email,
+        role: profile.role as UserRole,
+        avatar: profile.avatar_url
+      };
+      
+      return userProfile;
+    } catch (error) {
+      console.error('[AUTH] Unexpected error fetching profile:', error);
+      return null;
+    }
+  }, []);
+
+  // Login function with rate limiting protection and 2FA support
+  const login = async (email: string, password: string) => {
+    // If there's already a pending auth request, return it
+    if (pendingAuthRequest.current) {
+      console.log('[AUTH] Using existing pending auth request');
+      return pendingAuthRequest.current;
+    }
+
+    console.log('[AUTH] Starting new login request');
+    setIsLoading(true);
+    
+    try {
+      // Rate limiting check
+      const loginKey = `login_attempt_${email}`;
+      const lastAttempt = localStorage.getItem(loginKey);
+      const now = Date.now();
+      
+      if (lastAttempt) {
+        const timeSinceLastAttempt = now - parseInt(lastAttempt, 10);
+        const minWaitTime = 1000; // 1 second between attempts
+        
+        if (timeSinceLastAttempt < minWaitTime) {
+          console.log('[AUTH] Rate limiting login attempts');
+          return { 
+            success: false, 
+            error: 'Please wait a moment before trying again.' 
+          };
+        }
+      }
+      
+      // Record this attempt
+      localStorage.setItem(loginKey, now.toString());
+      
+      // Clear any existing auth state first to prevent conflicts
+      const supabase = getSupabaseClient();
+      await supabase.auth.signOut();
+      
+      // Attempt login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('[AUTH] Login error:', error.message);
+        return { success: false, error: error.message };
+      }
+      
+      if (!data || !data.user) {
+        console.error('[AUTH] No user returned from login');
+        return { success: false, error: 'Invalid login credentials' };
+      }
+      
+      // Check if user has 2FA enabled
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      
+      if (factors?.totp && factors.totp.length > 0) {
+        // User has 2FA enabled, require verification
+        console.log('[AUTH] 2FA required for user');
+        return { 
+          success: false, 
+          requires2FA: true, 
+          factorId: factors.totp[0].id 
+        };
+      }
+      
+      console.log('[AUTH] Login successful, fetching user profile');
+      const userProfile = await fetchUserProfile(data.user.id);
+      
+      if (!userProfile) {
+        console.error('[AUTH] No user profile found after login');
+        await supabase.auth.signOut();
+        return { success: false, error: 'User profile not found' };
+      }
+      
+      console.log('[AUTH] Setting user state with profile:', {
+        userId: userProfile.id,
+        userRole: userProfile.role,
+        userName: userProfile.name
+      });
+      setUser(userProfile);
+      
+      // Only redirect during login, not during page refresh/initialization
+      console.log('[AUTH] Login successful, redirecting to appropriate dashboard');
+      setTimeout(() => {
+        redirectBasedOnRole(userProfile.role, undefined, true);
+      }, 50);
+      
+      return { success: true };
+    } catch (err: any) {
+      console.error('[AUTH] Unexpected login error:', err);
+      return { success: false, error: 'An unexpected error occurred' };
+    } finally {
+      setIsLoading(false);
+      pendingAuthRequest.current = null;
+    }
+  };
+
+  // 2FA verification function
+  const verify2FA = async (factorId: string, code: string) => {
+    try {
+      console.log('[AUTH] Starting 2FA verification');
+      setIsLoading(true);
+      
+      const supabase = getSupabaseClient();
+      
+      // Create a challenge
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId
+      });
+      
+      if (challengeError) {
+        console.error('[AUTH] 2FA challenge error:', challengeError);
+        return { success: false, error: challengeError.message };
+      }
+      
+      // Verify the code
+      const { data, error } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId: challenge.id,
+        code
+      });
+      
+      if (error) {
+        console.error('[AUTH] 2FA verification error:', error);
+        return { success: false, error: error.message };
+      }
+      
+      // Get the authenticated user
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData.user) {
+        return { success: false, error: 'Authentication failed' };
+      }
+      
+      // Fetch user profile
+      const userProfile = await fetchUserProfile(userData.user.id);
+      
+      if (!userProfile) {
+        await supabase.auth.signOut();
+        return { success: false, error: 'User profile not found' };
+      }
+      
+      setUser(userProfile);
+      
+      // Redirect to appropriate dashboard
+      setTimeout(() => {
+        redirectBasedOnRole(userProfile.role, undefined, true);
+      }, 50);
+      
+      return { success: true };
+    } catch (err: any) {
+      console.error('[AUTH] Unexpected 2FA verification error:', err);
+      return { success: false, error: 'An unexpected error occurred' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      console.log('[AUTH] Logging out user');
+      setIsLoading(true);
+      
+      // Sign out from Supabase
+      const supabase = getSupabaseClient();
+      await supabase.auth.signOut();
+      
+      // Clear user from state
+      setUser(null);
+      
+      // Redirect to main landing page using hard redirect
+      window.location.href = '/';
+      
+      console.log('[AUTH] Logout successful');
+    } catch (error) {
+      console.error('[AUTH] Logout error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initialize auth state - wrapped in useEffect to prevent SSR issues
+  useEffect(() => {
+    let mounted = true;
+    console.log("[AUTH] Auth effect mounted");
+    
+    const initializeAuth = async () => {
+      try {
+        console.log("[AUTH] Starting authentication initialization");
+        setIsLoading(true);
+
+        // Check for active session directly from Supabase
+        const supabase = getSupabaseClient();
+        
+        // Skip auth check if we're on server-side or client is not properly initialized
+        if (typeof window === 'undefined' || !supabase.auth) {
+          console.log('[AUTH] Skipping auth check - not in browser or client not ready');
+          setIsLoading(false);
+          return;
+        }
+        
+        const { data, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error('[AUTH] Session error:', error.message);
+          // Only set user to null if it's a real auth error, not initialization issues
+          if (error.message !== 'Auth session missing!' || mounted) {
+            setUser(null);
+          }
+          return;
+        }
+        
+        if (data.user) {
+          console.log('[AUTH] Active session found, fetching user profile');
+          const userProfile = await fetchUserProfile(data.user.id);
+          
+          if (mounted && userProfile) {
+            console.log('[AUTH] Setting user from profile');
+            setUser(userProfile);
+            // Don't redirect during initialization - user is already on a page
+          } else {
+            console.log('[AUTH] No user profile found for session');
+            setUser(null);
+          }
+        } else {
+          console.log('[AUTH] No active session found');
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('[AUTH] Error initializing auth:', error);
+        setUser(null);
+      } finally {
+        // Only update loading state if component is still mounted
+        if (mounted) {
+          console.log("[AUTH] Authentication initialization completed");
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // Cleanup function
+    return () => {
+      console.log('[AUTH] Cleaning up auth');
+      mounted = false;
+      if (authChangeTimeoutId) {
+        clearTimeout(authChangeTimeoutId);
+      }
+    };
+  }, [fetchUserProfile, redirectBasedOnRole, router]);
+
+  // Context value
+  const value = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login,
+    verify2FA,
+    logout,
+    checkPermission,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Custom hook to use auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
