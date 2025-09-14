@@ -256,53 +256,53 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="w-full max-w-8xl mx-auto py-8 px-6 space-y-8">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold">Univen Customers</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold">Univen Customers</h1>
+          <p className="text-muted-foreground text-xl mt-2">
             Manage and track all Univen customer accounts
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <div className="text-lg text-muted-foreground">
             Showing {customers.length} of {totalCount} customers
           </div>
-          <Button variant="outline" size="sm" onClick={refreshData}>
-            <RefreshCw className="h-4 w-4" />
+          <Button variant="outline" size="lg" onClick={refreshData} className="py-3 px-4">
+            <RefreshCw className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <form onSubmit={handleSearch} className="flex flex-1 gap-2">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Card className="shadow-lg border border-border rounded-2xl">
+        <CardContent className="pt-8 pb-6">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <form onSubmit={handleSearch} className="flex flex-1 gap-3">
+              <div className="relative flex-1 max-w-2xl">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search by client reference, name, ID, phone, or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-12 py-6 text-lg rounded-xl"
                 />
               </div>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="py-6 px-8 text-lg">
                 {loading ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-5 w-5 animate-spin" />
                 ) : (
-                  <Search className="h-4 w-4" />
+                  <Search className="h-5 w-5" />
                 )}
-                <span className="sr-only">Search</span>
+                <span className="ml-2">Search</span>
               </Button>
             </form>
             
-            <div className="flex flex-wrap gap-2">
-              <div className="w-40">
+            <div className="flex flex-wrap gap-3">
+              <div className="w-48">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <Filter className="h-4 w-4 mr-2" />
+                  <SelectTrigger className="py-6 text-lg rounded-xl">
+                    <Filter className="h-5 w-5 mr-3" />
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -314,8 +314,8 @@ export default function CustomersPage() {
                 </Select>
               </div>
               
-              <Button variant="outline" onClick={exportCustomers}>
-                <Download className="h-4 w-4 mr-2" />
+              <Button variant="outline" onClick={exportCustomers} className="py-6 px-6 text-lg">
+                <Download className="h-5 w-5 mr-3" />
                 Export
               </Button>
             </div>
@@ -324,30 +324,30 @@ export default function CustomersPage() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-blue-100 rounded-full">
-                <User className="h-6 w-6 text-blue-600" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="shadow-lg border border-border rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-6">
+              <div className="p-4 bg-blue-100 rounded-2xl">
+                <User className="h-8 w-8 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Customers</p>
-                <p className="text-2xl font-bold">{totalCount.toLocaleString()}</p>
+                <p className="text-lg text-muted-foreground">Total Customers</p>
+                <p className="text-3xl font-bold">{totalCount.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-green-100 rounded-full">
-                <DollarSign className="h-6 w-6 text-green-600" />
+        <Card className="shadow-lg border border-border rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-6">
+              <div className="p-4 bg-green-100 rounded-2xl">
+                <DollarSign className="h-8 w-8 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Balance</p>
-                <p className="text-2xl font-bold">
+                <p className="text-lg text-muted-foreground">Total Balance</p>
+                <p className="text-3xl font-bold">
                   {formatUnivenCurrency(
                     customers.reduce((sum, customer) => sum + (customer["Current Balance"] || 0), 0)
                   )}
@@ -357,15 +357,15 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-yellow-100 rounded-full">
-                <AlertTriangle className="h-6 w-6 text-yellow-600" />
+        <Card className="shadow-lg border border-border rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-6">
+              <div className="p-4 bg-yellow-100 rounded-2xl">
+                <AlertTriangle className="h-8 w-8 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Overdue Accounts</p>
-                <p className="text-2xl font-bold">
+                <p className="text-lg text-muted-foreground">Overdue Accounts</p>
+                <p className="text-3xl font-bold">
                   {customers.filter(c => (c["Days Overdue"] || 0) > 0).length}
                 </p>
               </div>
@@ -373,15 +373,15 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-purple-100 rounded-full">
-                <CheckCircle className="h-6 w-6 text-purple-600" />
+        <Card className="shadow-lg border border-border rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-6">
+              <div className="p-4 bg-purple-100 rounded-2xl">
+                <CheckCircle className="h-8 w-8 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active Status</p>
-                <p className="text-2xl font-bold">
+                <p className="text-lg text-muted-foreground">Active Status</p>
+                <p className="text-3xl font-bold">
                   {customers.filter(c => c["Status"] === "Active").length}
                 </p>
               </div>
@@ -391,33 +391,33 @@ export default function CustomersPage() {
       </div>
 
       {/* Customers Table */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="shadow-lg border border-border rounded-2xl">
+        <CardHeader className="flex flex-row items-center justify-between pb-6">
           <div>
-            <CardTitle>Customer List</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-3xl">Customer List</CardTitle>
+            <CardDescription className="text-lg mt-2">
               A list of all Univen customers and their account details
             </CardDescription>
           </div>
-          <Tabs defaultValue="all" className="w-40">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
+          <Tabs defaultValue="all" className="w-48">
+            <TabsList className="grid w-full grid-cols-2 rounded-xl">
+              <TabsTrigger value="all" className="py-3 text-lg">All</TabsTrigger>
+              <TabsTrigger value="active" className="py-3 text-lg">Active</TabsTrigger>
             </TabsList>
           </Tabs>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+                <Skeleton key={i} className="h-20 w-full rounded-xl" />
               ))}
             </div>
           ) : customers.length === 0 ? (
-            <div className="text-center py-12">
-              <User className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-medium">No customers found</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+            <div className="text-center py-16">
+              <User className="mx-auto h-16 w-16 text-muted-foreground" />
+              <h3 className="mt-6 text-2xl font-medium">No customers found</h3>
+              <p className="mt-3 text-lg text-muted-foreground">
                 Try adjusting your search or filter to find what you're looking for.
               </p>
             </div>
@@ -425,101 +425,102 @@ export default function CustomersPage() {
             <>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12"></TableHead>
+                  <TableRow className="hover:bg-muted/50">
+                    <TableHead className="w-16"></TableHead>
                     <TableHead 
-                      className="cursor-pointer"
+                      className="cursor-pointer text-lg py-5"
                       onClick={() => handleSort("Client Reference")}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         Client Reference
                         {sortBy === "Client Reference" && (
-                          <span>{sortOrder === "asc" ? "↑" : "↓"}</span>
+                          <span className="text-xl">{sortOrder === "asc" ? "↑" : "↓"}</span>
                         )}
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer"
+                      className="cursor-pointer text-lg py-5"
                       onClick={() => handleSort("Client")}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         Customer Name
                         {sortBy === "Client" && (
-                          <span>{sortOrder === "asc" ? "↑" : "↓"}</span>
+                          <span className="text-xl">{sortOrder === "asc" ? "↑" : "↓"}</span>
                         )}
                       </div>
                     </TableHead>
-                    <TableHead>Contact</TableHead>
+                    <TableHead className="text-lg py-5">Contact</TableHead>
                     <TableHead 
-                      className="cursor-pointer text-right"
+                      className="cursor-pointer text-right text-lg py-5"
                       onClick={() => handleSort("Current Balance")}
                     >
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2">
                         Current Balance
                         {sortBy === "Current Balance" && (
-                          <span>{sortOrder === "asc" ? "↑" : "↓"}</span>
+                          <span className="text-xl">{sortOrder === "asc" ? "↑" : "↓"}</span>
                         )}
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer text-right"
+                      className="cursor-pointer text-right text-lg py-5"
                       onClick={() => handleSort("Days Overdue")}
                     >
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2">
                         Days Overdue
                         {sortBy === "Days Overdue" && (
-                          <span>{sortOrder === "asc" ? "↑" : "↓"}</span>
+                          <span className="text-xl">{sortOrder === "asc" ? "↑" : "↓"}</span>
                         )}
                       </div>
                     </TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Risk Level</TableHead>
+                    <TableHead className="text-lg py-5">Status</TableHead>
+                    <TableHead className="text-lg py-5">Risk Level</TableHead>
                     <TableHead 
-                      className="cursor-pointer"
+                      className="cursor-pointer text-lg py-5"
                       onClick={() => handleSort("Date Opened")}
                     >
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Date Opened
                         {sortBy === "Date Opened" && (
-                          <span>{sortOrder === "asc" ? "↑" : "↓"}</span>
+                          <span className="text-xl">{sortOrder === "asc" ? "↑" : "↓"}</span>
                         )}
                       </div>
                     </TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-right text-lg py-5">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {customers.map((customer) => (
                     <TableRow key={customer.id} className="hover:bg-muted/50">
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                        <div className="flex items-center space-x-3">
+                          <div className="h-3 w-3 rounded-full bg-green-500"></div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-lg py-5">
                         {customer["Client Reference"] || "N/A"}
                       </TableCell>
-                      <TableCell>
-                        <div className="font-medium">
+                      <TableCell className="py-5">
+                        <div className="font-medium text-lg">
                           {getUnivenCustomerFullName(customer)}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-base">
                           {customer["Client Group"] || "N/A"}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-5">
                         <div className="flex flex-col">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1">
-                                  <Phone className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-5 w-5 text-muted-foreground" />
+                                  <span className="text-base">
                                     {getUnivenCustomerPrimaryPhone(customer)}
                                   </span>
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent>
+                              <TooltipContent className="text-base">
                                 <p>Primary Phone</p>
                               </TooltipContent>
                             </Tooltip>
@@ -527,68 +528,70 @@ export default function CustomersPage() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1">
-                                  <Mail className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm">
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Mail className="h-5 w-5 text-muted-foreground" />
+                                  <span className="text-base">
                                     {getUnivenCustomerPrimaryEmail(customer)}
                                   </span>
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent>
+                              <TooltipContent className="text-base">
                                 <p>Primary Email</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-medium">
+                      <TableCell className="text-right font-medium text-lg py-5">
                         {formatUnivenCurrency(customer["Current Balance"])}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right text-lg py-5">
                         {customer["Days Overdue"] || "0"}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusVariant(customer["Status"] || null)}>
+                      <TableCell className="py-5">
+                        <Badge variant={getStatusVariant(customer["Status"] || null)} className="text-lg py-2 px-4">
                           {customer["Status"] || "N/A"}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-5">
                         {getRiskLevelBadge(
                           customer["Days Overdue"], 
                           customer["Current Balance"]
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-lg py-5">
                         {formatUnivenDate(customer["Date Opened"])}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right py-5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="h-10 w-10 p-0">
                               <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel className="text-lg">Actions</DropdownMenuLabel>
                             <DropdownMenuItem
                               onClick={() => viewCustomer(customer.id)}
+                              className="py-3 text-lg"
                             >
-                              <Eye className="mr-2 h-4 w-4" />
+                              <Eye className="mr-3 h-5 w-5" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <CreditCard className="mr-2 h-4 w-4" />
+                            <DropdownMenuItem className="py-3 text-lg">
+                              <CreditCard className="mr-3 h-5 w-5" />
                               Process Payment
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleCustomerAction("edit", customer)}
+                              className="py-3 text-lg"
                             >
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              className="text-destructive"
+                              className="text-destructive py-3 text-lg"
                               onClick={() => handleCustomerAction("delete", customer)}
                             >
                               Delete
@@ -603,8 +606,8 @@ export default function CustomersPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mt-8">
+                  <div className="text-lg text-muted-foreground">
                     Showing {(currentPage - 1) * pageSize + 1} to{" "}
                     {Math.min(currentPage * pageSize, totalCount)} of {totalCount} customers
                   </div>
@@ -613,7 +616,7 @@ export default function CustomersPage() {
                       <PaginationItem>
                         <PaginationPrevious 
                           onClick={() => handlePageChange(currentPage - 1)}
-                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer text-lg py-3 px-4"}
                         />
                       </PaginationItem>
                       
@@ -622,6 +625,7 @@ export default function CustomersPage() {
                         <PaginationItem>
                           <PaginationLink 
                             onClick={() => handlePageChange(1)}
+                            className="text-lg py-3 px-4"
                           >
                             1
                           </PaginationLink>
@@ -631,7 +635,7 @@ export default function CustomersPage() {
                       {/* Show ellipsis if needed */}
                       {currentPage > 3 && (
                         <PaginationItem>
-                          <span className="px-3 py-1 text-muted-foreground">...</span>
+                          <span className="px-4 py-3 text-muted-foreground text-lg">...</span>
                         </PaginationItem>
                       )}
                       
@@ -644,6 +648,7 @@ export default function CustomersPage() {
                               <PaginationLink 
                                 onClick={() => handlePageChange(page)}
                                 isActive={currentPage === page}
+                                className="text-lg py-3 px-4"
                               >
                                 {page}
                               </PaginationLink>
@@ -656,7 +661,7 @@ export default function CustomersPage() {
                       {/* Show ellipsis if needed */}
                       {currentPage < totalPages - 2 && (
                         <PaginationItem>
-                          <span className="px-3 py-1 text-muted-foreground">...</span>
+                          <span className="px-4 py-3 text-muted-foreground text-lg">...</span>
                         </PaginationItem>
                       )}
                       
@@ -665,6 +670,7 @@ export default function CustomersPage() {
                         <PaginationItem>
                           <PaginationLink 
                             onClick={() => handlePageChange(totalPages)}
+                            className="text-lg py-3 px-4"
                           >
                             {totalPages}
                           </PaginationLink>
@@ -674,7 +680,7 @@ export default function CustomersPage() {
                       <PaginationItem>
                         <PaginationNext 
                           onClick={() => handlePageChange(currentPage + 1)}
-                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer text-lg py-3 px-4"}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -688,18 +694,18 @@ export default function CustomersPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-2xl">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-lg">
               This action cannot be undone. This will permanently delete the customer record
               and remove their data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="py-6 text-lg">Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 py-6 text-lg"
               onClick={confirmDelete}
             >
               Delete
