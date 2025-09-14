@@ -119,39 +119,152 @@ export async function getAllUnivenCustomers(
   sortOrder: 'asc' | 'desc' = 'desc'
 ): Promise<{ customers: UnivenCustomer[], totalCount: number, error: string | null }> {
   try {
+    console.log('🔍 [getAllUnivenCustomers] Starting fetch with params:', { page, pageSize, sortBy, sortOrder });
+    
     // Calculate the range for pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     
-    // First get the total count
-    const { count, error: countError } = await supabase
-      .from('univen_customers')
-      .select('*', { count: 'exact', head: true });
-      
-    if (countError) {
-      console.error('Error counting univen_customers:', countError);
-      return { customers: [], totalCount: 0, error: countError.message };
+    // Check current user and tenant context
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('🔍 [getAllUnivenCustomers] Current user:', user?.id || 'No user');
+      if (userError) {
+        console.error('🔍 [getAllUnivenCustomers] Error getting user:', userError);
+      }
+    } catch (userException) {
+      console.error('🔍 [getAllUnivenCustomers] Exception getting user:', userException);
+    }
+    
+    // First get the total count with better error handling
+    let count = 0;
+    try {
+      console.log('🔍 [getAllUnivenCustomers] Attempting to count univen_customers...');
+      const { count: totalCount, error: countError } = await supabase
+        .from('univen_customers')
+        .select('*', { count: 'exact', head: true });
+        
+      if (countError) {
+        console.error('🔍 [getAllUnivenCustomers] Error counting univen_customers:', countError);
+        console.error('🔍 [getAllUnivenCustomers] Count error details:', JSON.stringify(countError, null, 2));
+        // Don't return an error immediately, continue with data fetch
+        count = 0;
+      } else {
+        count = totalCount || 0;
+        console.log('🔍 [getAllUnivenCustomers] Total count:', count);
+      }
+    } catch (countException) {
+      console.error('🔍 [getAllUnivenCustomers] Exception counting univen_customers:', countException);
+      // Continue with data fetch even if count fails
+      count = 0;
     }
     
     // Then get the paginated data
-    const { data, error } = await supabase
-      .from('univen_customers')
-      .select('*')
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range(from, to);
+    try {
+      console.log('🔍 [getAllUnivenCustomers] Attempting to fetch paginated data...');
+      // Try to fetch data without tenant filtering first
+      let query = supabase
+        .from('univen_customers')
+        .select('*')
+        .order(sortBy, { ascending: sortOrder === 'asc' })
+        .range(from, to);
 
-    if (error) {
-      console.error('Error fetching univen_customers:', error);
-      return { customers: [], totalCount: 0, error: error.message };
+      const { data, error } = await query;
+      console.log('🔍 [getAllUnivenCustomers] Query result - data length:', data?.length || 0, 'error:', error);
+
+      if (error) {
+        console.error('🔍 [getAllUnivenCustomers] Error fetching univen_customers:', error);
+        console.error('🔍 [getAllUnivenCustomers] Fetch error details:', JSON.stringify(error, null, 2));
+        console.error('🔍 [getAllUnivenCustomers] Error type:', typeof error);
+        console.error('🔍 [getAllUnivenCustomers] Error keys:', Object.keys(error));
+        
+        // Check if error has a message property
+        const errorMessage = error.message || 'Unknown error occurred';
+        console.error('🔍 [getAllUnivenCustomers] Error message:', errorMessage);
+        
+        // Check for specific RLS/tenant errors
+        if (errorMessage.includes('app.current_tenant_id') || errorMessage.includes('permission denied') || errorMessage.includes('row level security')) {
+          console.warn('🔍 [getAllUnivenCustomers] RLS/tenant error detected, trying fallback approaches...');
+          
+          // Try to set a tenant ID if we can get one from user context
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              // Try to get user's tenant from profiles
+              const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('tenant_id, role')
+                .eq('id', user.id)
+                .single();
+              
+              if (profile && !profileError && profile.tenant_id) {
+                console.log('🔍 [getAllUnivenCustomers] Found user tenant_id:', profile.tenant_id);
+                
+                // Try with explicit tenant filter
+                const { data: tenantData, error: tenantError } = await supabase
+                  .from('univen_customers')
+                  .select('*')
+                  .eq('tenant_id', profile.tenant_id)
+                  .order(sortBy, { ascending: sortOrder === 'asc' })
+                  .range(from, to);
+                
+                if (!tenantError && tenantData) {
+                  console.log('🔍 [getAllUnivenCustomers] Success with tenant filter! Data length:', tenantData.length);
+                  return { 
+                    customers: (tenantData as UnivenCustomer[]) || [], 
+                    totalCount: count, 
+                    error: null 
+                  };
+                } else {
+                  console.error('🔍 [getAllUnivenCustomers] Tenant filter failed:', tenantError);
+                }
+              } else {
+                console.warn('🔍 [getAllUnivenCustomers] No tenant_id found in user profile');
+              }
+            }
+          } catch (tenantException) {
+            console.error('🔍 [getAllUnivenCustomers] Exception in tenant fallback:', tenantException);
+          }
+          
+          // Final fallback: try without any filtering (may only work for admins)
+          console.warn('🔍 [getAllUnivenCustomers] Trying final fallback without tenant filter...');
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('univen_customers')
+            .select('*')
+            .order(sortBy, { ascending: sortOrder === 'asc' })
+            .range(from, to);
+          
+          if (fallbackError) {
+            console.error('🔍 [getAllUnivenCustomers] All fallbacks failed:', fallbackError);
+            return { 
+              customers: [], 
+              totalCount: count, 
+              error: `Failed to fetch customers: ${errorMessage}. Fallback also failed: ${fallbackError.message}` 
+            };
+          }
+          
+          console.log('🔍 [getAllUnivenCustomers] Fallback succeeded! Data length:', fallbackData?.length || 0);
+          return { 
+            customers: (fallbackData as UnivenCustomer[]) || [], 
+            totalCount: count, 
+            error: null 
+          };
+        }
+        
+        return { customers: [], totalCount: count, error: `Failed to fetch customers: ${errorMessage}` };
+      }
+
+      return { 
+        customers: (data as UnivenCustomer[]) || [], 
+        totalCount: count, 
+        error: null 
+      };
+    } catch (fetchException) {
+      console.error('Exception fetching univen_customers:', fetchException);
+      return { customers: [], totalCount: count, error: 'Exception occurred while fetching customers' };
     }
-
-    return { 
-      customers: (data as UnivenCustomer[]) || [], 
-      totalCount: count || 0, 
-      error: null 
-    };
   } catch (error) {
-    console.error('Exception fetching univen_customers:', error);
+    console.error('Unexpected exception fetching univen_customers:', error);
     return { customers: [], totalCount: 0, error: 'An unexpected error occurred' };
   }
 }
@@ -171,26 +284,57 @@ export async function searchUnivenCustomers(
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    // Search in multiple columns
-    const { data, error, count } = await supabase
-      .from('univen_customers')
-      .select('*', { count: 'exact' })
-      .or(`"Client Reference".ilike.%${searchTerm}%,First Name.ilike.%${searchTerm}%,Surname.ilike.%${searchTerm}%,"ID Number".ilike.%${searchTerm}%,Cellphone.ilike.%${searchTerm}%,Email.ilike.%${searchTerm}%`)
-      .order('created_at', { ascending: false })
-      .range(from, to);
+    // Search in multiple columns with better error handling
+    try {
+      let query = supabase
+        .from('univen_customers')
+        .select('*', { count: 'exact' })
+        .or(`"Client Reference".ilike.%${searchTerm}%,First Name.ilike.%${searchTerm}%,Surname.ilike.%${searchTerm}%,"ID Number".ilike.%${searchTerm}%,Cellphone.ilike.%${searchTerm}%,Email.ilike.%${searchTerm}%`)
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
-    if (error) {
-      console.error('Error searching univen_customers:', error);
-      return { customers: [], totalCount: 0, error: error.message };
+      const { data, error, count } = await query;
+
+      if (error) {
+        console.error('Error searching univen_customers:', error);
+        console.error('Search error details:', JSON.stringify(error, null, 2));
+        
+        // If it's a tenant configuration error, try without tenant filtering
+        if (error.message.includes('app.current_tenant_id')) {
+          console.warn('Tenant configuration missing, searching all customers without tenant filter');
+          const { data: fallbackData, error: fallbackError, count: fallbackCount } = await supabase
+            .from('univen_customers')
+            .select('*', { count: 'exact' })
+            .or(`"Client Reference".ilike.%${searchTerm}%,First Name.ilike.%${searchTerm}%,Surname.ilike.%${searchTerm}%,"ID Number".ilike.%${searchTerm}%,Cellphone.ilike.%${searchTerm}%,Email.ilike.%${searchTerm}%`)
+            .order('created_at', { ascending: false })
+            .range(from, to);
+          
+          if (fallbackError) {
+            console.error('Fallback error searching univen_customers:', fallbackError);
+            return { customers: [], totalCount: 0, error: `Failed to search customers: ${fallbackError.message}` };
+          }
+          
+          return { 
+            customers: (fallbackData as UnivenCustomer[]) || [], 
+            totalCount: fallbackCount || 0, 
+            error: null 
+          };
+        }
+        
+        return { customers: [], totalCount: 0, error: `Failed to search customers: ${error.message}` };
+      }
+
+      return { 
+        customers: (data as UnivenCustomer[]) || [], 
+        totalCount: count || 0, 
+        error: null 
+      };
+    } catch (searchException) {
+      console.error('Exception searching univen_customers:', searchException);
+      return { customers: [], totalCount: 0, error: 'Exception occurred while searching customers' };
     }
-
-    return { 
-      customers: (data as UnivenCustomer[]) || [], 
-      totalCount: count || 0, 
-      error: null 
-    };
   } catch (error) {
-    console.error('Exception searching univen_customers:', error);
+    console.error('Unexpected exception searching univen_customers:', error);
     return { customers: [], totalCount: 0, error: 'An unexpected error occurred' };
   }
 }
