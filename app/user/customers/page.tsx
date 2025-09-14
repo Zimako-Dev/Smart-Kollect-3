@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Card,
@@ -19,7 +19,6 @@ import {
 import { 
   Input
 } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { 
   Button
 } from '@/components/ui/button';
@@ -31,6 +30,13 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Search, Phone, Mail } from 'lucide-react';
 import { 
   getAllUnivenCustomers, 
@@ -48,13 +54,14 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<UnivenCustomer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const pageSize = 20;
 
   // Fetch customers
-  const fetchCustomers = useCallback(async () => {
+  const fetchCustomers = async () => {
     setLoading(true);
     try {
       let result;
@@ -82,7 +89,7 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, currentPage, pageSize]);
+  };
 
   // Handle search
   const handleSearch = (e: React.FormEvent) => {
@@ -106,12 +113,12 @@ export default function CustomersPage() {
   // Fetch customers on page load and when search/page changes
   useEffect(() => {
     fetchCustomers();
-  }, [fetchCustomers]);
+  }, [currentPage]);
 
   useEffect(() => {
     if (searchTerm === "") {
       setCurrentPage(1);
-      // fetchCustomers will be called automatically due to dependency change
+      fetchCustomers();
     }
   }, [searchTerm]);
 
@@ -124,10 +131,10 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search and Filters */}
       <Card>
         <CardContent className="pt-6">
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -136,6 +143,19 @@ export default function CustomersPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
+            </div>
+            <div className="w-full sm:w-40">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit" disabled={loading}>
               {loading ? "Searching..." : "Search"}
