@@ -161,6 +161,69 @@ export default function CustomerProfilePage() {
     }
   };
 
+  // Dummy account history data
+  const accountHistory = [
+    {
+      id: 1,
+      date: "2023-10-15",
+      activity: "Payment Received",
+      description: "Direct bank transfer",
+      amount: "R 1,250.00",
+      balance: "R 8,750.00",
+      status: "Completed"
+    },
+    {
+      id: 2,
+      date: "2023-10-10",
+      activity: "Payment Plan Created",
+      description: "Monthly installment plan",
+      amount: "R 1,500.00",
+      balance: "R 10,000.00",
+      status: "Active"
+    },
+    {
+      id: 3,
+      date: "2023-10-05",
+      activity: "Call Attempt",
+      description: "Contacted customer - no answer",
+      amount: "",
+      balance: "R 10,000.00",
+      status: "Pending"
+    },
+    {
+      id: 4,
+      date: "2023-09-28",
+      activity: "Payment Received",
+      description: "EFT payment",
+      amount: "R 2,000.00",
+      balance: "R 10,000.00",
+      status: "Completed"
+    },
+    {
+      id: 5,
+      date: "2023-09-20",
+      activity: "Account Assigned",
+      description: "New account allocation",
+      amount: "",
+      balance: "R 12,000.00",
+      status: "Completed"
+    }
+  ];
+
+  // Status badge styling
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return 'default';
+      case 'active':
+        return 'secondary';
+      case 'pending':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
       {/* Header */}
@@ -168,48 +231,52 @@ export default function CustomerProfilePage() {
         <Button 
           variant="outline" 
           onClick={() => router.push('/user/customers')}
-          className="flex items-center border-border py-2 px-4"
+          className="flex items-center border-border py-2 px-4 hover:bg-accent transition-colors duration-200"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Customers
         </Button>
         
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="border-border py-2 px-4">
+              <Button variant="outline" className="border-border py-2 px-4 hover:bg-accent transition-colors duration-200">
                 <MoreHorizontal className="h-4 w-4 mr-2" />
                 Actions
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background border-border w-48">
-              <DropdownMenuLabel>Customer Actions</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="bg-background border-border w-56 rounded-xl shadow-lg">
+              <DropdownMenuLabel className="font-semibold py-2">Customer Actions</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem className="py-2">
-                <Phone className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="py-2 cursor-pointer hover:bg-accent rounded-lg mx-1 transition-colors duration-200">
+                <Phone className="h-4 w-4 mr-3 text-primary" />
                 Call Customer
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-2">
-                <Mail className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="py-2 cursor-pointer hover:bg-accent rounded-lg mx-1 transition-colors duration-200">
+                <Mail className="h-4 w-4 mr-3 text-primary" />
                 Send Email
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-2">
-                <DollarSign className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="py-2 cursor-pointer hover:bg-accent rounded-lg mx-1 transition-colors duration-200">
+                <DollarSign className="h-4 w-4 mr-3 text-primary" />
                 Create Payment Plan
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem className="py-2">
-                <Activity className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="py-2 cursor-pointer hover:bg-accent rounded-lg mx-1 transition-colors duration-200">
+                <Activity className="h-4 w-4 mr-3 text-primary" />
                 View Payment History
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-2">
-                <FileText className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="py-2 cursor-pointer hover:bg-accent rounded-lg mx-1 transition-colors duration-200">
+                <FileText className="h-4 w-4 mr-3 text-primary" />
                 Generate Report
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="default" onClick={() => setEditMode(!editMode)} className="py-2 px-4">
+          <Button 
+            variant="default" 
+            onClick={() => setEditMode(!editMode)} 
+            className="py-2 px-4 bg-primary hover:bg-primary/90 transition-colors duration-200 shadow-sm"
+          >
             <Edit className="h-4 w-4 mr-2" />
             {editMode ? 'Cancel Edit' : 'Edit Customer'}
           </Button>
@@ -217,45 +284,57 @@ export default function CustomerProfilePage() {
       </div>
 
       {/* Customer Overview Card */}
-      <Card className="mb-6 shadow-lg border border-border bg-background rounded-xl">
-        <CardHeader className="pb-6">
-          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
+      <Card className="mb-6 shadow-lg border border-border bg-background rounded-2xl overflow-hidden">
+        <CardHeader className="pb-6 bg-gradient-to-r from-primary/5 to-secondary/5">
+          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-8">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <div className="bg-gradient-to-br from-primary to-secondary rounded-2xl w-24 h-24 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                {getUnivenCustomerFullName(customer)?.charAt(0) || 'U'}
+              <div className="relative">
+                <div className="bg-gradient-to-br from-primary to-secondary rounded-2xl w-28 h-28 flex items-center justify-center text-white text-4xl font-bold shadow-lg border-4 border-background">
+                  {getUnivenCustomerFullName(customer)?.charAt(0) || 'U'}
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-md">
+                  <div className="bg-green-500 rounded-full w-6 h-6"></div>
+                </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold mb-2">{getUnivenCustomerFullName(customer)}</h1>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="py-1 px-3 border-border">
+                <h1 className="text-3xl font-bold mb-3 text-foreground">{getUnivenCustomerFullName(customer)}</h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge variant="outline" className="py-1.5 px-3.5 text-sm font-medium border-border bg-background">
                     {customer["Client Reference"] || 'N/A'}
                   </Badge>
                   <Badge 
                     variant={getRiskBadgeVariant(getUnivenCustomerRiskLevel(customer))}
-                    className="py-1 px-3"
+                    className="py-1.5 px-3.5 text-sm font-medium"
                   >
                     {getUnivenCustomerRiskLevel(customer)?.toUpperCase() || 'UNKNOWN'} RISK
                   </Badge>
                   {getUnivenCustomerOverdueStatus(customer) && (
-                    <Badge variant="destructive" className="py-1 px-3">
+                    <Badge variant="destructive" className="py-1.5 px-3.5 text-sm font-medium">
                       OVERDUE
                     </Badge>
                   )}
-                  <Badge variant="secondary" className="py-1 px-3">
+                  <Badge variant="secondary" className="py-1.5 px-3.5 text-sm font-medium">
                     {customer["Status"] || 'N/A'}
                   </Badge>
                 </div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-4 rounded-2xl border border-primary/20 min-w-[250px] shadow-md">
-              <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
-              <p className="text-3xl font-bold text-primary mb-1">
-                {formatUnivenCurrency(customer["Current Balance"])}
-              </p>
-              <div className="flex items-center">
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-5 rounded-2xl border border-primary/20 min-w-[280px] shadow-md backdrop-blur-sm">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
+                  <p className="text-3xl font-bold text-primary mb-2">
+                    {formatUnivenCurrency(customer["Current Balance"])}
+                  </p>
+                </div>
+                <div className="bg-primary/10 p-2 rounded-full">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+              <div className="flex items-center pt-2 border-t border-primary/10 mt-3">
                 <TrendingUp className="h-4 w-4 text-green-500 mr-2" />
-                <span className="text-sm text-green-500">+2.5% from last month</span>
+                <span className="text-sm text-green-500 font-medium">+2.5% from last month</span>
               </div>
             </div>
           </div>
@@ -266,14 +345,16 @@ export default function CustomerProfilePage() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Contact Information */}
-            <div className="bg-background/50 p-4 rounded-2xl border border-border shadow-md">
-              <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2 text-primary" />
+            <div className="bg-background/50 p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
+                <div className="bg-primary/10 p-2 rounded-lg mr-3">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
                 Contact Information
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center">
-                  <div className="bg-primary/10 p-2 rounded-full mr-3">
+                  <div className="bg-primary/10 p-2.5 rounded-full mr-4">
                     <Phone className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -282,7 +363,7 @@ export default function CustomerProfilePage() {
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <div className="bg-primary/10 p-2 rounded-full mr-3">
+                  <div className="bg-primary/10 p-2.5 rounded-full mr-4">
                     <Mail className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -294,14 +375,16 @@ export default function CustomerProfilePage() {
             </div>
             
             {/* Account Information */}
-            <div className="bg-background/50 p-4 rounded-2xl border border-border shadow-md">
-              <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <CreditCard className="h-5 w-5 mr-2 text-secondary" />
+            <div className="bg-background/50 p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
+                <div className="bg-secondary/10 p-2 rounded-lg mr-3">
+                  <CreditCard className="h-5 w-5 text-secondary" />
+                </div>
                 Account Information
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center">
-                  <div className="bg-secondary/10 p-2 rounded-full mr-3">
+                  <div className="bg-secondary/10 p-2.5 rounded-full mr-4">
                     <FileText className="h-5 w-5 text-secondary" />
                   </div>
                   <div>
@@ -310,7 +393,7 @@ export default function CustomerProfilePage() {
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <div className="bg-secondary/10 p-2 rounded-full mr-3">
+                  <div className="bg-secondary/10 p-2.5 rounded-full mr-4">
                     <Calendar className="h-5 w-5 text-secondary" />
                   </div>
                   <div>
@@ -319,7 +402,7 @@ export default function CustomerProfilePage() {
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <div className="bg-secondary/10 p-2 rounded-full mr-3">
+                  <div className="bg-secondary/10 p-2.5 rounded-full mr-4">
                     <AlertTriangle className="h-5 w-5 text-secondary" />
                   </div>
                   <div>
@@ -331,14 +414,16 @@ export default function CustomerProfilePage() {
             </div>
             
             {/* Address Information */}
-            <div className="bg-background/50 p-4 rounded-2xl border border-border shadow-md">
-              <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-tertiary" />
+            <div className="bg-background/50 p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
+                <div className="bg-tertiary/10 p-2 rounded-lg mr-3">
+                  <MapPin className="h-5 w-5 text-tertiary" />
+                </div>
                 Address
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <div className="bg-tertiary/10 p-2 rounded-full mr-3 mt-1">
+                  <div className="bg-tertiary/10 p-2.5 rounded-full mr-4 mt-1">
                     <Building className="h-5 w-5 text-tertiary" />
                   </div>
                   <div>
@@ -355,12 +440,12 @@ export default function CustomerProfilePage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button className="flex-1 min-w-[180px] py-2 bg-primary hover:bg-primary/90">
+                  <Button className="flex-1 min-w-[180px] py-2.5 bg-primary hover:bg-primary/90 transition-colors duration-200 shadow-sm">
                     <Phone className="h-4 w-4 mr-2" />
                     Call Customer
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-background border-border p-2">
+                <TooltipContent className="bg-background border-border p-2 rounded-lg">
                   <p>Initiate a call to this customer</p>
                 </TooltipContent>
               </Tooltip>
@@ -369,12 +454,12 @@ export default function CustomerProfilePage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" className="flex-1 min-w-[180px] py-2 border-border">
+                  <Button variant="outline" className="flex-1 min-w-[180px] py-2.5 border-border hover:bg-accent transition-colors duration-200">
                     <Mail className="h-4 w-4 mr-2" />
                     Send Email
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-background border-border p-2">
+                <TooltipContent className="bg-background border-border p-2 rounded-lg">
                   <p>Send an email to this customer</p>
                 </TooltipContent>
               </Tooltip>
@@ -383,12 +468,12 @@ export default function CustomerProfilePage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" className="flex-1 min-w-[180px] py-2 border-border">
+                  <Button variant="outline" className="flex-1 min-w-[180px] py-2.5 border-border hover:bg-accent transition-colors duration-200">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Create Payment Plan
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-background border-border p-2">
+                <TooltipContent className="bg-background border-border p-2 rounded-lg">
                   <p>Set up a payment plan for this customer</p>
                 </TooltipContent>
               </Tooltip>
@@ -397,12 +482,12 @@ export default function CustomerProfilePage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" className="flex-1 min-w-[180px] py-2 border-border">
+                  <Button variant="outline" className="flex-1 min-w-[180px] py-2.5 border-border hover:bg-accent transition-colors duration-200">
                     <FileText className="h-4 w-4 mr-2" />
                     Add Note
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-background border-border p-2">
+                <TooltipContent className="bg-background border-border p-2 rounded-lg">
                   <p>Add a note to this customer's file</p>
                 </TooltipContent>
               </Tooltip>
@@ -602,6 +687,56 @@ export default function CustomerProfilePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Account History */}
+      <Card className="mb-6 bg-background border-border rounded-2xl shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Activity className="h-5 w-5 mr-2 text-primary" />
+            Account History
+          </CardTitle>
+          <CardDescription>Recent activities and transactions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-2 text-sm font-semibold text-muted-foreground">Date</th>
+                  <th className="text-left py-3 px-2 text-sm font-semibold text-muted-foreground">Activity</th>
+                  <th className="text-left py-3 px-2 text-sm font-semibold text-muted-foreground">Description</th>
+                  <th className="text-right py-3 px-2 text-sm font-semibold text-muted-foreground">Amount</th>
+                  <th className="text-right py-3 px-2 text-sm font-semibold text-muted-foreground">Balance</th>
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-muted-foreground">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accountHistory.map((item) => (
+                  <tr key={item.id} className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors duration-150">
+                    <td className="py-4 px-2 text-sm">{item.date}</td>
+                    <td className="py-4 px-2 font-medium">{item.activity}</td>
+                    <td className="py-4 px-2 text-sm text-muted-foreground">{item.description}</td>
+                    <td className={`py-4 px-2 text-right font-medium ${item.amount.startsWith('R -') ? 'text-destructive' : item.amount ? 'text-green-500' : ''}`}>
+                      {item.amount}
+                    </td>
+                    <td className="py-4 px-2 text-right font-medium">{item.balance}</td>
+                    <td className="py-4 px-2 text-center">
+                      <Badge variant={getStatusBadgeVariant(item.status)} className="py-1 px-2.5 text-xs">
+                        {item.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-end mt-6">
+            <Button variant="outline" className="py-2 px-4 text-sm">
+              View Full History
+            </Button>
           </div>
         </CardContent>
       </Card>
