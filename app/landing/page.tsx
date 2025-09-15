@@ -333,21 +333,21 @@ export default function LandingPage() {
       </header>
 
       {/* Enhanced Hero Section */}
-      <section className="relative pt-40 pb-32 px-4 overflow-hidden min-h-screen flex items-center">
+      <section className="relative pt-32 pb-24 px-4 overflow-hidden min-h-screen flex items-center">
         {/* Multi-layered Background */}
         <div className="absolute inset-0">
           {/* Primary gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-secondary/8" />
           
           {/* Animated orbs */}
-          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-primary/15 to-transparent rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-32 right-10 w-[500px] h-[500px] bg-gradient-to-l from-secondary/15 to-transparent rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}} />
+          <div className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-r from-primary/10 to-transparent rounded-full blur-2xl" />
+          <div className="absolute bottom-32 right-10 w-[300px] h-[300px] bg-gradient-to-l from-secondary/10 to-transparent rounded-full blur-2xl" style={{animationDelay: '2s'}} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-r from-primary/3 via-secondary/3 to-primary/3 rounded-full blur-2xl" style={{animationDelay: '4s'}} />
           
           {/* Floating particles */}
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{animationDelay: '1s', animationDuration: '3s'}} />
-          <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-secondary/40 rounded-full animate-bounce" style={{animationDelay: '2s', animationDuration: '4s'}} />
-          <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce" style={{animationDelay: '3s', animationDuration: '2.5s'}} />
+          <div className="absolute top-1/4 left-1/4 w-1.5 h-1.5 bg-primary/30 rounded-full" style={{animationDelay: '1s', animationDuration: '3s'}} />
+          <div className="absolute top-3/4 right-1/4 w-2 h-2 bg-secondary/30 rounded-full" style={{animationDelay: '2s', animationDuration: '4s'}} />
+          <div className="absolute top-1/2 left-3/4 w-1 h-1 bg-primary/40 rounded-full" style={{animationDelay: '3s', animationDuration: '2.5s'}} />
           
           {/* Grid pattern overlay */}
           <div className="absolute inset-0 opacity-5">
@@ -371,25 +371,21 @@ export default function LandingPage() {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
-              <span className="block mb-2">Transform Your</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <span className="block mb-2">Welcome to SmartKollect</span>
               <span className="relative inline-block">
                 <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-pulse">
-                  Debt Collection
+                  Your AI Partner for Smarter Debt Management
                 </span>
                 {/* Underline animation */}
-                <div className="absolute -bottom-4 left-0 right-0 h-2 bg-gradient-to-r from-primary/50 via-secondary/50 to-primary/50 rounded-full animate-pulse" style={{animationDelay: '0.5s'}} />
+                <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-primary/50 via-secondary/50 to-primary/50 rounded-full animate-pulse" style={{animationDelay: '0.5s'}} />
               </span>
-              <span className="block mt-2">Process</span>
             </h1>
             
             {/* Enhanced Description */}
-            <div className="max-w-4xl mx-auto mb-12">
-              <p className="text-xl md:text-2xl text-muted-foreground mb-6 leading-relaxed">
-                SmartKollect combines <span className="font-semibold text-primary">intelligent automation</span>, 
-                <span className="font-semibold text-secondary"> real-time analytics</span>, and 
-                <span className="font-semibold text-green-500"> POPI compliance</span> to revolutionize 
-                how South African organizations manage debt collection.
+            <div className="max-w-3xl mx-auto mb-8">
+              <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed">
+                Transform and optimise your debt management processes with SmartKollect — the AI-powered system built to maximise collections, streamline workflows, boost employee performance, and enhance overall cash flow for your organisation.
               </p>
               
               {/* Key benefits pills */}
@@ -407,18 +403,18 @@ export default function LandingPage() {
             </div>
 
             {/* Enhanced CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button
                 size="lg"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="group relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-primary hover:from-primary/90 hover:via-secondary/90 hover:to-primary/90 text-white px-10 py-5 text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-110 border-2 border-primary/30"
+                className="group relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-primary hover:from-primary/90 hover:via-secondary/90 hover:to-primary/90 text-white px-8 py-4 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-primary/30"
               >
                 {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                <div className="flex items-center gap-3 relative z-10">
-                  <Zap className="h-6 w-6 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <div className="flex items-center gap-2 relative z-10">
+                  <Zap className="h-5 w-5 animate-pulse" />
                   <span>Start Free Trial</span>
-                  <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </Button>
               
@@ -426,46 +422,46 @@ export default function LandingPage() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="group border-2 border-primary/30 hover:border-primary/50 bg-background/50 backdrop-blur-sm hover:bg-primary/5 px-10 py-5 text-xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                className="group border border-primary/30 hover:border-primary/50 bg-background/50 backdrop-blur-sm hover:bg-primary/5 px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <Link href="/marketing/contact">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <div className="relative">
-                      <PlayCircle className="h-6 w-6 group-hover:scale-110 transition-transform" />
+                      <PlayCircle className="h-5 w-5 group-hover:scale-105 transition-transform" />
                       <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-0 group-hover:opacity-100" />
                     </div>
                     <span>Watch Demo</span>
-                    <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform duration-300" />
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </Link>
               </Button>
             </div>
 
             {/* Enhanced Trust Indicators */}
-            <div className="max-w-5xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="flex flex-col items-center p-6 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 backdrop-blur-sm border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:scale-105 group">
-                  <div className="w-16 h-16 mb-4 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center border border-green-500/30 group-hover:scale-110 transition-transform">
-                    <CheckCircle2 className="h-8 w-8 text-green-500" />
+            <div className="max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 backdrop-blur-sm border border-green-500/20 hover:border-green-500/40 transition-all duration-300 group">
+                  <div className="w-12 h-12 mb-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center border border-green-500/30">
+                    <CheckCircle2 className="h-6 w-6 text-green-500" />
                   </div>
-                  <h3 className="font-bold text-lg mb-2 text-green-600 dark:text-green-400">30-Day Free Trial</h3>
-                  <p className="text-sm text-muted-foreground text-center">Full access to all features with no commitment required</p>
+                  <h3 className="font-bold text-base mb-1 text-green-600 dark:text-green-400">30-Day Free Trial</h3>
+                  <p className="text-xs text-muted-foreground text-center">Full access to all features with no commitment required</p>
                 </div>
                 
-                <div className="flex flex-col items-center p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover:scale-105 group">
-                  <div className="w-16 h-16 mb-4 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center border border-blue-500/30 group-hover:scale-110 transition-transform">
-                    <Shield className="h-8 w-8 text-blue-500" />
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 group">
+                  <div className="w-12 h-12 mb-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
+                    <Shield className="h-6 w-6 text-blue-500" />
                   </div>
-                  <h3 className="font-bold text-lg mb-2 text-blue-600 dark:text-blue-400">POPI Compliant</h3>
-                  <p className="text-sm text-muted-foreground text-center">Built-in compliance for South African data protection laws</p>
+                  <h3 className="font-bold text-base mb-1 text-blue-600 dark:text-blue-400">POPI Compliant</h3>
+                  <p className="text-xs text-muted-foreground text-center">Built-in compliance for South African data protection laws</p>
                 </div>
                 
-                <div className="flex flex-col items-center p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:scale-105 group">
-                  <div className="w-16 h-16 mb-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center border border-purple-500/30 group-hover:scale-110 transition-transform">
-                    <Clock className="h-8 w-8 text-purple-500" />
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 group">
+                  <div className="w-12 h-12 mb-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center border border-purple-500/30">
+                    <Clock className="h-6 w-6 text-purple-500" />
                   </div>
-                  <h3 className="font-bold text-lg mb-2 text-purple-600 dark:text-purple-400">24/7 Support</h3>
-                  <p className="text-sm text-muted-foreground text-center">Round-the-clock expert assistance and dedicated support</p>
+                  <h3 className="font-bold text-base mb-1 text-purple-600 dark:text-purple-400">24/7 Support</h3>
+                  <p className="text-xs text-muted-foreground text-center">Round-the-clock expert assistance and dedicated support</p>
                 </div>
               </div>
             </div>
@@ -481,7 +477,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section id="stats" className="py-20 px-4 bg-muted/30">
+      <section id="stats" className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             {stats.map((stat, index) => {
@@ -504,7 +500,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4">
+      <section id="features" className="py-16 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
@@ -543,7 +539,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 bg-muted/30">
+      <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
