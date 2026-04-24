@@ -132,6 +132,15 @@ const getStatusBadge = (status: string) => {
   }
 };
 
+// Safe helper: extract initials from a potentially-null name string
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0] || "")
+    .join("") || "?";
+}
+
 interface DialerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -495,7 +504,8 @@ export function Dialer({ open, onOpenChange }: DialerProps) {
     if (customer) {
       setCurrentCustomer(customer);
       // Clean the phone number to remove any non-numeric characters
-      const cleanPhoneNumber = customer.phone.replace(/\D/g, "");
+      // Guard against null phone value
+      const cleanPhoneNumber = (customer.phone || '').replace(/\D/g, "");
       
       // Try to open MicroSIP directly first
       const microsipOpened = openMicroSIP(cleanPhoneNumber);
@@ -1052,10 +1062,7 @@ export function Dialer({ open, onOpenChange }: DialerProps) {
                             <div className="flex items-center gap-3">
                               <Avatar className="h-10 w-10 border border-slate-600">
                                 <AvatarFallback className="bg-indigo-900 text-indigo-200">
-                                  {currentCustomer.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
+                                  {getInitials(currentCustomer.name)}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
@@ -1241,10 +1248,7 @@ export function Dialer({ open, onOpenChange }: DialerProps) {
                             {currentCustomer ? (
                               <Avatar className="h-20 w-20 border-2 border-indigo-600 mx-auto">
                                 <AvatarFallback className="bg-indigo-900 text-indigo-200 text-xl">
-                                  {currentCustomer.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
+                                  {getInitials(currentCustomer.name)}
                                 </AvatarFallback>
                               </Avatar>
                             ) : (
@@ -1341,10 +1345,7 @@ export function Dialer({ open, onOpenChange }: DialerProps) {
                               <div className="absolute inset-0 bg-indigo-500/20 rounded-full animate-ping"></div>
                               <Avatar className="h-20 w-20 border-2 border-indigo-600 relative z-10">
                                 <AvatarFallback className="bg-indigo-900 text-indigo-200 text-xl">
-                                  {callerInfo
-                                    .split(" ")
-                                    .map((name: string) => name[0])
-                                    .join("")}
+                                  {getInitials(callerInfo)}
                                 </AvatarFallback>
                               </Avatar>
                             </div>
@@ -1451,11 +1452,7 @@ export function Dialer({ open, onOpenChange }: DialerProps) {
                                     <div className="flex items-center gap-3">
                                       <Avatar className="h-10 w-10 border border-slate-600">
                                         <AvatarFallback className="bg-indigo-900 text-indigo-200">
-                                          {fullName
-                                            .split(" ")
-                                            .map((n) => n[0] || "")
-                                            .join("")
-                                            .substring(0, 2)}
+                                          {getInitials(fullName)}
                                         </AvatarFallback>
                                       </Avatar>
                                       <div>
@@ -2065,10 +2062,7 @@ export function Dialer({ open, onOpenChange }: DialerProps) {
                   <div className="absolute inset-0 bg-indigo-500/20 rounded-full animate-ping"></div>
                   <Avatar className="h-10 w-10 border border-indigo-600/50 bg-indigo-900/50 relative z-10">
                     <AvatarFallback className="bg-indigo-900/50 text-indigo-200 text-xs">
-                      {callerInfo
-                        .split(" ")
-                        .map((name: string) => name[0])
-                        .join("")}
+                      {getInitials(callerInfo)}
                     </AvatarFallback>
                   </Avatar>
                 </div>
