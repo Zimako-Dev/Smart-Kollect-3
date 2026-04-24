@@ -83,6 +83,15 @@ import { Analytics } from "@vercel/analytics/next";
 
 // Dynamically import chart components with no SSR to avoid hydration issues
 
+// Safe helper: extract initials from a potentially-null name string
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0] || "")
+    .join("") || "?";
+}
+
 export default function DashboardPage() {
   const { isDialerOpen, setIsDialerOpen } = useDialer();
   const [showBrokenPTP, setShowBrokenPTP] = useState(false);
@@ -1017,10 +1026,7 @@ export default function DashboardPage() {
                                 : "bg-slate-700 text-slate-200"
                             }
                           >
-                            {account.customerName
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                            {getInitials(account.customerName)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
